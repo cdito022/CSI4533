@@ -19,41 +19,40 @@ void display_image(std::string name, cv::Mat image) {
 // USAGE: ./dominant <imagefile>
 int main(int argc, char* argv[]) {
     // some validation
-    if(argc != 2) {
-        std::cerr << "USAGE: " << argv[0] << " <imagefile>" << std::endl;
+    if(argc != 3) {
+        std::cerr << "USAGE: " << argv[0] << " <targetfile> <imagefile>" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    // try to open target file
+    cv::Mat target = cv::imread(argv[1]);
+    if(!target.data) {
+        std::cerr << "Invalid target file provided." << std::endl;
         exit(EXIT_FAILURE);
     }
 
     // try to open image file
-    cv::Mat image = cv::imread(argv[1]);
+    cv::Mat image = cv::imread(argv[2]);
     if(!image.data) {
         std::cerr << "Invalid image file provided." << std::endl;
         exit(EXIT_FAILURE);
     }
 
-    // ok we good now
-    // now get hsv version of image
+    // display the images we got
+    display_image("Target", target);
+    display_image("Image to search", image);
+
+    // now get hsv version of target
+    // and its dominant colour
     // i'll tell you what - i just googled hsv
     // and got herpes...
     // anyway here we go
-    cv::Mat hsvImage = bgr2hsv(image);
+    cv::Vec3b dominant = find_dominant_colour(bgr2hsv(target));
 
-    // call our function that finds a dominant colour
+    // call our function that finds dominant pixels
     // it speaks hsv so be nice to it
-    cv::Vec3b d_colour = find_dominant_colour(hsvImage);
-
-    // display things so it looks really good
-    display_image(argv[1], image);
-
-    // find dominant pixels
-    cv::Mat dominant_map = detect_dominant(hsvImage, d_colour);
-    dominant_map = hsv2bgr(dominant_map);
+    cv::Mat dominant_map = hsv2bgr(detect_dominant(bgr2hsv(image), dominant));
     display_image("Dominant zones", dominant_map);
-
-    // and the dominant colour
-    /*cv::Mat dominant(200, 200, CV_8UC3, cv::Scalar(d_colour[0], d_colour[1], d_colour[2]));
-    dominant = hsv2bgr(dominant);
-    display_image("Dominant colour", dominant);*/
 
     // stop here
 	cv::waitKey(0);
