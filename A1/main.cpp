@@ -45,10 +45,15 @@ int main(int argc, char* argv[]) {
     // display things so it looks really good
     display_image(argv[1], image);
 
+    // find dominant pixels
+    cv::Mat dominant_map = detect_dominant(hsvImage, d_colour);
+    dominant_map = hsv2bgr(dominant_map);
+    display_image("Dominant zones", dominant_map);
+
     // and the dominant colour
-    cv::Mat dominant(200, 200, CV_8UC3, cv::Scalar(d_colour[0], d_colour[1], d_colour[2]));
+    /*cv::Mat dominant(200, 200, CV_8UC3, cv::Scalar(d_colour[0], d_colour[1], d_colour[2]));
     dominant = hsv2bgr(dominant);
-    display_image("Dominant colour", dominant);
+    display_image("Dominant colour", dominant);*/
 
     // stop here
 	cv::waitKey(0);

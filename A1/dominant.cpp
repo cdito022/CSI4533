@@ -39,10 +39,37 @@ cv::Vec3b find_dominant_colour(cv::Mat image) {
         }
     }
 
-    cv::Vec3b dominant;
-    dominant[0] = unreduce_colour(maxbin);
-    dominant[1] = 255;
-    dominant[2] = 255;
-
+    cv::Vec3b dominant(unreduce_colour(maxbin), 255, 255);
     return dominant;
+}
+
+cv::Mat detect_dominant(cv::Mat image, cv::Vec3b colour) {
+    // make a clone
+    cv::Mat mono = image.clone();
+
+    // get dominant hue
+    int tgt_hue = reduce_colour(colour[0]);
+
+    // pixels
+    cv::Vec3b white(0, 0, 255);
+    cv::Vec3b black(0, 0, 0);
+
+    // scan image, set right pixels to white, rest to black
+    for(int row = 0; row < mono.rows; ++row) {
+		cv::Vec3b* current = mono.ptr<cv::Vec3b>(row);
+
+        for(int col = 0; col < mono.cols; ++col) {
+            // reduce the colour
+            int hue = reduce_colour(current[col][0]);
+
+            if(hue == tgt_hue) {
+                current[col] = white;
+            }
+            else {
+                current[col] = black;
+            }
+        }
+	}
+
+    return mono;
 }

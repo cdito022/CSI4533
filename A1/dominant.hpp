@@ -10,4 +10,6 @@ int reduce_colour(int hue);
 
 cv::Vec3b find_dominant_colour(cv::Mat image);
 
+cv::Mat detect_dominant(cv::Mat image, cv::Vec3b colour);
+
 #endif
