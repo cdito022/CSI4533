@@ -1,5 +1,7 @@
 #include "dominant.hpp"
 
+#include <opencv2/core/core.hpp>
+
 // reduce the hue (0-179) to one of the preset colours (0-11)
 int reduce_colour(int hue) {
     // "+ DEGREES_PER_BIN / 2" degree 0 is exactly in the middle of red so we shift a bit
@@ -43,7 +45,7 @@ cv::Vec3b find_dominant_colour(cv::Mat image) {
     return dominant;
 }
 
-cv::Mat detect_dominant(cv::Mat image, cv::Vec3b colour) {
+cv::Mat detect_dominant(cv::Mat image, cv::Vec3b colour, int s_threshold = 0, int v_threshold = 0) {
     // make a clone
     cv::Mat mono = image.clone();
 
@@ -62,7 +64,7 @@ cv::Mat detect_dominant(cv::Mat image, cv::Vec3b colour) {
             // reduce the colour
             int hue = reduce_colour(current[col][0]);
 
-            if(hue == tgt_hue) {
+            if(hue == tgt_hue && current[col][1] >= s_threshold && current[col][2] >= v_threshold) {
                 current[col] = white;
             }
             else {

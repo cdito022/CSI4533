@@ -6,10 +6,8 @@
 #include <opencv2/imgproc.hpp>
 
 #include "dominant.hpp"
+#include "monochromatic.hpp"
 #include "util.hpp"
-
-#define DEGREES_PER_BIN 15
-#define NUM_BINS 12
 
 void display_image(std::string name, cv::Mat image) {
     cv::namedWindow(name);
@@ -51,7 +49,8 @@ int main(int argc, char* argv[]) {
 
     // call our function that finds dominant pixels
     // it speaks hsv so be nice to it
-    cv::Mat dominant_map = hsv2bgr(detect_dominant(bgr2hsv(image), dominant));
+    cv::Mat dominant_map = hsv2bgr(detect_dominant(bgr2hsv(image), dominant, 100, 100));
+    dominant_map = erode(dominant_map);
     display_image("Dominant zones", dominant_map);
 
     // stop here
