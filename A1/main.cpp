@@ -9,10 +9,6 @@
 #include "monochromatic.hpp"
 #include "util.hpp"
 
-void display_image(std::string name, cv::Mat image) {
-    cv::namedWindow(name);
-    cv::imshow(name, image);
-}
 
 // USAGE: ./dominant <imagefile>
 int main(int argc, char* argv[]) {
@@ -45,13 +41,19 @@ int main(int argc, char* argv[]) {
     // i'll tell you what - i just googled hsv
     // and got herpes...
     // anyway here we go
-    cv::Vec3b dominant = find_dominant_colour(bgr2hsv(target));
+    cv::Vec3b dominant_colour = find_dominant_colour(bgr2hsv(target));
 
     // call our function that finds dominant pixels
-    // it speaks hsv so be nice to it
-    cv::Mat dominant_map = hsv2bgr(detect_dominant(bgr2hsv(image), dominant, 100, 100));
+    // it speaks hsv (returns rgb) so be nice to it
+    cv::Mat dominant_map = bgr2hsv(image);
+    dominant_map = detect_dominant(dominant_map, dominant_colour, 100, 100);
     dominant_map = erode(dominant_map);
     display_image("Dominant zones", dominant_map);
+
+    // find most surrounded pixel and draw box around
+    cv::Point msp = most_surrounded_pixel(dominant_map, 10);
+    draw_box(image, cv::Vec3b(0,0,255), msp, 20, 20);
+    display_image("Estimated object position", image);
 
     // stop here
 	cv::waitKey(0);

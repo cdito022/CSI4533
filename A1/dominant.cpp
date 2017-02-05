@@ -53,7 +53,7 @@ cv::Mat detect_dominant(cv::Mat image, cv::Vec3b colour, int s_threshold = 0, in
     int tgt_hue = reduce_colour(colour[0]);
 
     // pixels
-    cv::Vec3b white(0, 0, 255);
+    cv::Vec3b white(255, 255, 255);
     cv::Vec3b black(0, 0, 0);
 
     // scan image, set right pixels to white, rest to black
