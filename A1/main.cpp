@@ -10,7 +10,7 @@
 #include "util.hpp"
 
 
-// USAGE: ./dominant <imagefile>
+// USAGE: ./find <imagefile>
 int main(int argc, char* argv[]) {
     // some validation
     if(argc != 3) {
@@ -46,9 +46,12 @@ int main(int argc, char* argv[]) {
     // call our function that finds dominant pixels
     // it speaks hsv (returns rgb) so be nice to it
     cv::Mat dominant_map = bgr2hsv(image);
+
     dominant_map = detect_dominant(dominant_map, dominant_colour, 100, 100);
+    display_image("Dominant zones, pre-erode", dominant_map);
+
     dominant_map = erode(dominant_map);
-    display_image("Dominant zones", dominant_map);
+    display_image("Dominant zones, post-erode", dominant_map);
 
     // find most surrounded pixel and draw box around
     cv::Point msp = most_surrounded_pixel(dominant_map, 10);
