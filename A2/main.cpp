@@ -16,10 +16,10 @@ int main(int argc, char* argv[]) {
 	}
 
 	// if opening failed
-    if(!capture.isOpened()) {
-        std::cerr << "Error reading video sequence." << std::endl;
-        exit(EXIT_FAILURE);
-    }
+	if(!capture.isOpened()) {
+		std::cerr << "Error reading video sequence." << std::endl;
+		exit(EXIT_FAILURE);
+	}
 
 	double rate = capture.get(CV_CAP_PROP_FPS);
 	int delay = 1000 / rate;
