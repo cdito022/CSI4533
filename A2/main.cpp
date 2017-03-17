@@ -35,6 +35,7 @@ int main(int argc, char* argv[]) {
 		// convert to grayscale for hough
 		cv::Mat grayscale;
 		cv::cvtColor(frame, grayscale, CV_BGR2GRAY);
+		cv::GaussianBlur(grayscale, grayscale, cv::Size(5,5), 1.5);
 
 		// detect circles
 		std::vector<cv::Vec3f> circles;
