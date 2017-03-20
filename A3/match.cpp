@@ -8,7 +8,7 @@
 std::vector<cv::KeyPoint> detect_keypoints(cv::Mat& image) {
 	std::vector<cv::KeyPoint> keypoints;
 
-	auto detector = cv::BRISK::create(130);
+	auto detector = cv::BRISK::create(100);
 	detector->detect(image, keypoints);
 
 	return keypoints;
@@ -17,7 +17,7 @@ std::vector<cv::KeyPoint> detect_keypoints(cv::Mat& image) {
 cv::Mat compute_descriptors(cv::Mat& image, std::vector<cv::KeyPoint>& keypoints) {
 	cv::Mat descriptors;
 
-	auto descriptor = cv::BRISK::create(130);
+	auto descriptor = cv::BRISK::create();
 	descriptor->compute(image, keypoints, descriptors);
 
 	return descriptors;
