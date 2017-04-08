@@ -1,6 +1,11 @@
 #include "homography.hpp"
 
 #include "match.hpp"
+#include "util.hpp"
+
+#include <opencv2/core.hpp>
+#include <opencv2/features2d.hpp>
+#include <opencv2/highgui.hpp>
 
 struct homography_descriptor find_best_homography(std::vector<cv::Mat>& frames, int pos) {
 	cv::Mat frame = frames[pos];
