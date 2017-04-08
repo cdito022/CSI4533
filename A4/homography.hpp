@@ -19,4 +19,8 @@ struct homography_descriptor find_best_homography(std::vector<cv::Mat>& frames, 
 // find_homography tries to find an homography between images A and B
 cv::Mat find_homography(cv::Mat A, cv::Mat B);
 
+// chain_homographies tries to establish a relationship
+// between all frames and the first frame
+void chain_homographies(std::vector<homography_descriptor>& homographies);
+
 #endif

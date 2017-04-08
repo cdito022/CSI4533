@@ -30,17 +30,6 @@ void homography_thread(	std::vector<cv::Mat>* frames,
 
 		// find match
 		homographies->at(i) = find_best_homography(*frames, i);
-
-		// some debug information
-		struct homography_descriptor& homography = homographies->at(i);
-		if(homography.with == -1) {
-			std::cout << "No match found for image " << i << std::endl;
-		}
-		else {
-			std::cout << "Frame " << i << " has a match with frame " << homography.with << std::endl;
-		}
-
-		// go to next frame we can treat
 	}
 }
 
@@ -68,10 +57,35 @@ int main(int argc, char* argv[]) {
 	for(int i = 0; i < NUM_THREADS; ++i) {
 		threads.push_back(std::thread(homography_thread, &frames, &homographies, &pos, &mtx));
 	}
-
 	// catch threads
 	for(int i = 0; i < threads.size(); ++i) {
 		threads[i].join();
+	}
+
+	std::cout << "Initial homographies:" << std::endl;
+	for(int i = 0; i < homographies.size(); ++i) {
+		// some debug information
+		struct homography_descriptor& homography = homographies[i];
+		if(homography.with == -1) {
+			std::cout << "No match found for image " << i << std::endl;
+		}
+		else {
+			std::cout << "Frame " << i << " has a match with frame " << homography.with << std::endl;
+		}
+	}
+
+	chain_homographies(homographies);
+
+	std::cout << std::endl << "Chained homographies:" << std::endl;
+	for(int i = 0; i < homographies.size(); ++i) {
+		// some debug information
+		struct homography_descriptor& homography = homographies[i];
+		if(homography.with == -1) {
+			std::cout << "No match found for image " << i << std::endl;
+		}
+		else {
+			std::cout << "Frame " << i << " has a match with frame " << homography.with << std::endl;
+		}
 	}
 
 	return 0;

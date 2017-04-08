@@ -41,3 +41,15 @@ cv::Mat find_homography(cv::Mat A, cv::Mat B) {
 		return cv::Mat();
 	}
 }
+
+void chain_homographies(std::vector<homography_descriptor>& homographies) {
+	for(int i = 0; i < homographies.size(); ++i) {
+		auto& homography = homographies[i];
+
+		while(homography.with > 0) {
+			// chain homographies
+			homography.matrix = homographies[homography.with].matrix * homography.matrix;
+			homography.with = homographies[homography.with].with;
+		}
+	}
+}
