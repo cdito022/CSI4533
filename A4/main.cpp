@@ -5,10 +5,14 @@
 #include <thread>
 #include <vector>
 
+#include "cmdline.hpp"
 #include "homography.hpp"
-#include "SequenceReader.hpp"
 #include "transformation.hpp"
 #include "util.hpp"
+
+#include "SequenceReader.hpp"
+#include "DirectoryReader.hpp"
+#include "VideoReader.hpp"
 
 #include <opencv2/core.hpp>
 #include <opencv2/features2d.hpp>
@@ -39,8 +43,29 @@ void homography_thread(	std::vector<cv::Mat>* frames,
 }
 
 int main(int argc, char* argv[]) {
-	// open and validate
-	auto reader = reader_from_args(argc, argv);
+	auto parser = setup_parser();
+	parser.parse_check(argc, argv);
+
+	// get that one required argument
+	std::string path;
+	if(parser.rest().size() > 0) {
+		path = parser.rest()[0];
+	}
+	else {
+		std::cerr << "Must specify <path> of video file or image folder to read from." << std::endl << parser.usage();
+		exit(EXIT_FAILURE);
+	}
+
+	// open reader
+	SequenceReader* reader = nullptr;
+	if(parser.exist("directory")) {
+		reader = new DirectoryReader(path);
+	}
+	else {
+		reader = new VideoReader(path);
+	}
+
+	// check that yes, we got this
 	if(!reader->isOpened()) {
 		std::cerr << "Error opening sequence." << std::endl;
 		exit(EXIT_FAILURE);
@@ -51,6 +76,9 @@ int main(int argc, char* argv[]) {
 	while(reader->hasFrames()) {
 		frames.push_back(reader->getNextFrame());
 	}
+
+	// adios reader
+	delete reader;
 
 	// compute homographies
 	std::vector<struct homography_descriptor> homographies(frames.size());
@@ -120,6 +148,11 @@ int main(int argc, char* argv[]) {
 				}
 			}
 		}
+	}
+
+	// do we save to file?
+	if(parser.exist("output")) {
+		cv::imwrite(parser.get<std::string>("output"), master);
 	}
 
 	display_image("ANOTHER BRICK IN THE WALL", master);
