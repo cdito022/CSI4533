@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <iostream>
 #include <mutex>
+#include <string>
 #include <thread>
 #include <vector>
 
@@ -83,8 +84,98 @@ int main(int argc, char* argv[]) {
 		- bring pixels over to master image
 	 */
 
+	// HERE WE GO
+
+	// MASTER IMAGE
+	cv::Mat& master = frames[0];
+
+	// compute transformed corners for all other images
+	int	minX = 0,
+		maxX = master.cols,
+		minY = 0,
+		maxY = master.rows;
+
+	for(int i = 1; i < frames.size(); ++i) {
+		auto& frame = frames[i];
+		auto& homography = homographies[i];
+
+		if(homography.with == 0) { // skip bad frames
+			auto corners = transform_corners(frame, homography.matrix.inv());
+			// find min and max x and y after transformation
+			for(auto p : corners) {
+				int x = (int)p.x, y = (int)p.y;
+				minX = std::min(x, minX);
+				maxX = std::max(x, maxX);
+				minY = std::min(y, minY);
+				maxY = std::max(y, maxY);
+			}
+		}
+	}
+
+	// stretch master image to accomodate found dimensions
+	cv::copyMakeBorder(master, master, -minY, maxY-master.rows, -minX, maxX-master.cols, cv::BORDER_CONSTANT, cv::Scalar(0));
+
+	// adjust each homography according to found dimensions min x and y
+	// warp all images to a frame the same size as master
+	for(int i = 1; i < frames.size(); ++i) {
+		auto& frame = frames[i];
+		auto& homography = homographies[i];
+
+		if(homography.with == 0) { // skip bad frames
+			homography.matrix.at<double>(0,2)+= std::min(0, minX);
+			homography.matrix.at<double>(1,2)+= std::min(0, minY);
+
+			cv::warpPerspective(frame, frame, homography.matrix.inv(), cv::Size(master.cols, master.rows));
+		}
+	}
+
+	std::cout << "time to transpose" << std::endl;
+
+	// transpose pixels to master image
+	cv::Vec3b black(0,0,0); // comes in handy
+
+	for(int i = 1; i < frames.size(); ++i) {
+		auto& frame = frames[i];
+		auto& homography = homographies[i];
+
+		if(homography.with == 0) { // skip bad frames
+			for(int row = 0; row < frame.rows; ++row) {
+				for(int col = 0; col < frame.cols; ++col) {
+					if(master.at<cv::Vec3b>(row, col) == black && frame.at<cv::Vec3b>(row, col) != black) {
+						master.at<cv::Vec3b>(row, col) = frame.at<cv::Vec3b>(row, col);
+					}
+				}
+			}
+		}
+	}
+
+	// DEBUG: display frames;
+	/*for(int i = 0; i < frames.size(); ++i) {
+		if(i == 0 || homographies[i].with == 0) {
+			display_image("Viewer", frames[i]);
+			cv::waitKey(0);
+		}
+	}*/
+
+	display_image("ANOTHER BRICK IN THE WALL", master);
+	cv::waitKey(0);
+
+	return 0;
+
+
+
+
+
+
+
+
+
+
+
+	// DEBUG STUFF
+
 	// first image and image that will be added
-	cv::Mat master = frames[0];
+	/*cv::Mat master = frames[0];
 	int n = 1;
 	cv::Mat addon = frames[n];
 	auto& homography = homographies[n];
@@ -93,7 +184,7 @@ int main(int argc, char* argv[]) {
 	// find new corners after perspective transform
 	auto corners = transform_corners(addon, homography.matrix.inv());
 
-	int minX = 0, maxX = 0, minY = 0, maxY = 0;
+	int minX = 0, maxX = master.cols, minY = 0, maxY = master.rows;
 
 	for(auto p : corners) {
 		int x = (int)p.x;
@@ -111,28 +202,33 @@ int main(int argc, char* argv[]) {
 	// END find new corners
 
 	// enlarge image to make room
-	int top = std::max(0-minY, 0);
-	int bottom = std::max(0, maxY-addon.rows);
-	int left = std::max(0-minX, 0);
-	int right = std::max(0, maxX-addon.cols);
-	printf("top = %d, bottom = %d, left = %d, right = %d\n", top, bottom, left, right);
-	cv::copyMakeBorder(addon, addon, top, bottom, left, right, cv::BORDER_CONSTANT, cv::Scalar(0));
+	cv::copyMakeBorder(master, master, 0-minY, maxY-master.rows, 0-minX, maxX-master.cols, cv::BORDER_CONSTANT, cv::Scalar(0));
+	cv::copyMakeBorder(addon, addon, 0-minY, maxY-addon.rows, 0-minX, maxX-addon.cols, cv::BORDER_CONSTANT, cv::Scalar(0));
+
+	display_homography_matrix(homography.matrix);
 
 	// shift homography
-	if(minX < 0) {
-		homography.matrix.at<float>(0,2)-= minX;
-	}
-	if(minY < 0) {
-		homography.matrix.at<float>(1,2)-= minY;
-	}
+	//homography.matrix.at<float>(0,2)-= std::min(0,minX);
+	//homography.matrix.at<float>(1,2)-= std::min(0,minY);
+
+	display_homography_matrix(homography.matrix);
 
 	// warp this shit
 	cv::warpPerspective(addon, addon, homography.matrix, cv::Size(addon.cols, addon.rows), cv::WARP_INVERSE_MAP);
 
-	display_image("Master", master);
-	display_image("Add-on", addon);
+	cv::Vec3b black(0,0,0);
+	for(int row = 0; row < master.rows; ++row) {
+		for(int col = 0; col < master.cols; ++col) {
+			if(master.at<cv::Vec3b>(row,col) == black && addon.at<cv::Vec3b>(row,col) != black) {
+				master.at<cv::Vec3b>(row,col) = addon.at<cv::Vec3b>(row,col);
+			}
+		}
+	}
 
-	cv::waitKey(0);
+	//display_image("Master", master);
+	//display_image("Add-on", addon);
+
+	cv::waitKey(0);*/
 
 	return 0;
 }

@@ -23,4 +23,6 @@ cv::Mat find_homography(cv::Mat A, cv::Mat B);
 // between all frames and the first frame
 void chain_homographies(std::vector<homography_descriptor>& homographies);
 
+void display_homography_matrix(cv::Mat homography);
+
 #endif

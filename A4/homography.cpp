@@ -1,5 +1,7 @@
 #include "homography.hpp"
 
+#include <cstdio>
+
 #include "match.hpp"
 #include "util.hpp"
 
@@ -56,5 +58,14 @@ void chain_homographies(std::vector<homography_descriptor>& homographies) {
 			homography.matrix = homographies[homography.with].matrix * homography.matrix;
 			homography.with = homographies[homography.with].with;
 		}
+	}
+}
+
+void display_homography_matrix(cv::Mat homography) {
+	for(int row = 0; row < homography.rows; ++row) {
+		for(int col = 0; col < homography.cols; ++col) {
+			printf("%f ", homography.at<double>(row, col));
+		}
+		printf("\n");
 	}
 }
