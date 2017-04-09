@@ -17,7 +17,7 @@ cmdline::parser setup_parser() {
 
 	parser.add<std::string>("output", 'o', "Output file to write stitched image to.", false);
 	parser.add("directory", 'd', "Indicate that the passed argument is a directory from which images should be loaded.");
-	// add MAGIC argument, etc.
+	parser.add("magic", 'm', "Use MAGIC technique for advanced stitching.");
 
 	parser.footer("<path>");
 

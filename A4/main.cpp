@@ -73,7 +73,10 @@ int main(int argc, char* argv[]) {
 
 	// grab the frames
 	std::vector<cv::Mat> frames;
-	while(reader->hasFrames()) {
+	if(parser.exist("magic")) {
+		frames.push_back(cv::imread("magic.jpg"));
+	}
+	else while(reader->hasFrames()) {
 		frames.push_back(reader->getNextFrame());
 	}
 
